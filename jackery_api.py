@@ -1,3 +1,8 @@
+"""
+Acknowledgments:
+This code is largely based on the implementation introduced in the following Qiita article by Hsky16:
+https://qiita.com/Hsky16/items/c163137265a87186ac39
+"""
 import json
 import os
 import requests
@@ -5,6 +10,8 @@ import time
 import base64
 import uuid
 import hashlib
+import csv
+from datetime import datetime
 from pathlib import Path
 from typing import Optional
 from Cryptodome.Cipher import AES, PKCS1_v1_5
@@ -275,6 +282,20 @@ if __name__ == "__main__":
     # 登録デバイスが存在する場合、最初のデバイスIDを利用
     device_id = device_list["data"][0]["devId"]
 
+    csv_filename = "jackery_log.csv"
+    csv_header = [
+        "Timestamp", "Battery(%)", "BatteryTemp(C)", "ACInputPower(W)", "InputPower(W)", "InputTime(h)",
+        "OutputAC", "OutputDC", "ACOutputVoltage(V)", "OutputPower(W)", "OutputTime(h)",
+        "LightMode", "ScreenTimeout", "SuperFastCharge", "ChargeSpeed", "LowPowerSetting",
+        "PowerManagement", "AutoSavingTime"
+    ]
+    
+    # CSVファイルが存在しない場合はヘッダーを書き込む
+    if not os.path.exists(csv_filename):
+        with open(csv_filename, "w", encoding="utf-8", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(csv_header)
+
     while True:
         result = api.get_device_detail(device_id)
         device_info = result["data"]["properties"]
@@ -296,6 +317,33 @@ if __name__ == "__main__":
         low_power_setting = device_info["lps"]  # パフォーマンス設定
         power_management = device_info["pm"]  # 省エネモード
         auto_saving_time = device_info["ast"]  # 自動オフ時間
+
+        # CSVへの書き出し
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        row = [
+            timestamp,
+            remaining_battery,
+            f"{battery_temperature:.1f}",
+            ac_input_power,
+            input_power,
+            f"{input_time:.1f}",
+            output_ac,
+            output_dc,
+            f"{ac_output_voltage:.1f}",
+            output_power,
+            f"{output_time:.1f}",
+            light_mode,
+            screen_timeout_behavior,
+            super_fast_charge,
+            charge_speed,
+            low_power_setting,
+            power_management,
+            auto_saving_time
+        ]
+
+        with open(csv_filename, "a", encoding="utf-8", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(row)
 
         print("----- ポータブル電源の現在の状態 -----")
         print(f"バッテリー残量 (%):          {remaining_battery}%")
