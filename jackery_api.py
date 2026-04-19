@@ -5,7 +5,9 @@ https://qiita.com/Hsky16/items/c163137265a87186ac39
 """
 import json
 import os
+import random
 import requests
+import string
 import time
 import base64
 import uuid
@@ -124,7 +126,9 @@ class JackeryAPI:
             "/HStss7Q8/5DqkGD1annQ+eoICo3oi0dITZ0Qll56Dowb8lXi6WHViVDdih/oeUwV"
             "JY89uJNtTWrz7t7QIDAQAB"
         )
-        aes_key = b"1234567890123456"
+        # Jackeryのサーバーは文字コードとして解釈できないバイナリデータを拒否するため、
+        # ランダムな16文字の英数字を生成してセッションごとのAES鍵として使用する
+        aes_key = ''.join(random.choices(string.ascii_letters + string.digits, k=16)).encode('utf-8')
         login_bean_json = json.dumps(login_bean, ensure_ascii=False)
         aes_encrypt_data = self._encrypt_with_aes(login_bean_json, aes_key)
         rsa_for_aes_key = self._encrypt_with_rsa(aes_key, public_key_b64)
