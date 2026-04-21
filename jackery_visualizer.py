@@ -54,7 +54,7 @@ class JackeryVisualizer(QtWidgets.QMainWindow):
     def init_ui(self):
         """UIの初期化ダイアログ"""
         self.setWindowTitle('Jackery Log Visualizer')
-        self.resize(1200, 700)
+        self.resize(900, 480)
         
         central_widget = QtWidgets.QWidget()
         self.setCentralWidget(central_widget)

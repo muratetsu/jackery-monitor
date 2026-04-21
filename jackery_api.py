@@ -287,6 +287,7 @@ if __name__ == "__main__":
     device_id = device_list["data"][0]["devId"]
 
     csv_filename = "jackery_log.csv"
+    error_log_filename = "errorlog.txt"
     csv_header = [
         "Timestamp", "Battery(%)", "BatteryTemp(C)", "ACInputPower(W)", "InputPower(W)", "InputTime(h)",
         "OutputAC", "OutputDC", "ACOutputVoltage(V)", "OutputPower(W)", "OutputTime(h)",
@@ -301,75 +302,82 @@ if __name__ == "__main__":
             writer.writerow(csv_header)
 
     while True:
-        result = api.get_device_detail(device_id)
-        device_info = result["data"]["properties"]
+        try:
+            result = api.get_device_detail(device_id)
+            device_info = result["data"]["properties"]
 
-        remaining_battery = device_info["rb"]  # バッテリー残量(%)
-        battery_temperature = device_info["bt"] / 10.0  # バッテリー温度(℃)
-        output_power = device_info["op"]  # AC+DC出力電力(W)
-        ac_input_power = device_info["acip"]  # AC入力電力(W)
-        input_power = device_info["ip"] # 入力電力(W)
-        input_time = device_info["it"] / 100.0  # 充電完了時間(h)
-        output_ac = device_info["oac"] == 1  # AC出力のON/OFF
-        output_dc = device_info["odc"] == 1  # DC出力のON/OFF
-        ac_output_voltage = device_info["acov"] / 10.0  # AC出力電圧(V)
-        output_time = device_info["ot"] / 10.0  # 出力可能時間(h)
-        light_mode = device_info["lm"]  # ライトモード
-        screen_timeout_behavior = device_info["sltb"]  # ディスプレイ設定
-        super_fast_charge = device_info["sfc"]  # 緊急充電モード
-        charge_speed = device_info["cs"]  # 充電速度設定
-        low_power_setting = device_info["lps"]  # パフォーマンス設定
-        power_management = device_info["pm"]  # 省エネモード
-        auto_saving_time = device_info["ast"]  # 自動オフ時間
+            remaining_battery = device_info["rb"]  # バッテリー残量(%)
+            battery_temperature = device_info["bt"] / 10.0  # バッテリー温度(℃)
+            output_power = device_info["op"]  # AC+DC出力電力(W)
+            ac_input_power = device_info["acip"]  # AC入力電力(W)
+            input_power = device_info["ip"] # 入力電力(W)
+            input_time = device_info["it"] / 100.0  # 充電完了時間(h)
+            output_ac = device_info["oac"] == 1  # AC出力のON/OFF
+            output_dc = device_info["odc"] == 1  # DC出力のON/OFF
+            ac_output_voltage = device_info["acov"] / 10.0  # AC出力電圧(V)
+            output_time = device_info["ot"] / 10.0  # 出力可能時間(h)
+            light_mode = device_info["lm"]  # ライトモード
+            screen_timeout_behavior = device_info["sltb"]  # ディスプレイ設定
+            super_fast_charge = device_info["sfc"]  # 緊急充電モード
+            charge_speed = device_info["cs"]  # 充電速度設定
+            low_power_setting = device_info["lps"]  # パフォーマンス設定
+            power_management = device_info["pm"]  # 省エネモード
+            auto_saving_time = device_info["ast"]  # 自動オフ時間
 
-        # CSVへの書き出し
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        row = [
-            timestamp,
-            remaining_battery,
-            f"{battery_temperature:.1f}",
-            ac_input_power,
-            input_power,
-            f"{input_time:.1f}",
-            output_ac,
-            output_dc,
-            f"{ac_output_voltage:.1f}",
-            output_power,
-            f"{output_time:.1f}",
-            light_mode,
-            screen_timeout_behavior,
-            super_fast_charge,
-            charge_speed,
-            low_power_setting,
-            power_management,
-            auto_saving_time
-        ]
+            # CSVへの書き出し
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            row = [
+                timestamp,
+                remaining_battery,
+                f"{battery_temperature:.1f}",
+                ac_input_power,
+                input_power,
+                f"{input_time:.1f}",
+                output_ac,
+                output_dc,
+                f"{ac_output_voltage:.1f}",
+                output_power,
+                f"{output_time:.1f}",
+                light_mode,
+                screen_timeout_behavior,
+                super_fast_charge,
+                charge_speed,
+                low_power_setting,
+                power_management,
+                auto_saving_time
+            ]
 
-        with open(csv_filename, "a", encoding="utf-8", newline="") as f:
-            writer = csv.writer(f)
-            writer.writerow(row)
+            with open(csv_filename, "a", encoding="utf-8", newline="") as f:
+                writer = csv.writer(f)
+                writer.writerow(row)
 
-        print("----- ポータブル電源の現在の状態 -----")
-        print(f"バッテリー残量 (%):          {remaining_battery}%")
-        print(f"バッテリー温度 (°C):         {battery_temperature:.1f}℃")
-        print()
-        print(f"AC入力電力 (W):             {ac_input_power} W")
-        print(f"入力電力 (W):               {input_power} W")
-        print(f"充電完了時間:                {input_time:.1f} h")
-        print()
-        print(f"AC出力スイッチ(ON/OFF):      {output_ac}")
-        print(f"DC出力スイッチ(ON/OFF):      {output_dc}")
-        print(f"AC出力電圧 (V):             {ac_output_voltage:.1f} V")
-        print(f"出力電力 (W):               {output_power} W")
-        print(f"出力可能時間:                {output_time:.1f} h")
-        print()
-        print(f"ライトモード:                {light_mode}")
-        print(f"ディスプレイ設定:             {screen_timeout_behavior}")
-        print()
-        print(f"緊急充電モード:              {super_fast_charge}")
-        print(f"充電速度設定:                {charge_speed}")
-        print(f"パフォーマンス設定:           {low_power_setting}")
-        print(f"省エネモード:                {power_management}")
-        print(f"自動オフ時間:                {auto_saving_time}")
-        print("--------------------------------\n")
+            print("----- ポータブル電源の現在の状態 -----")
+            print(f"バッテリー残量 (%):          {remaining_battery}%")
+            print(f"バッテリー温度 (°C):         {battery_temperature:.1f}℃")
+            print()
+            print(f"AC入力電力 (W):             {ac_input_power} W")
+            print(f"入力電力 (W):               {input_power} W")
+            print(f"充電完了時間:                {input_time:.1f} h")
+            print()
+            print(f"AC出力スイッチ(ON/OFF):      {output_ac}")
+            print(f"DC出力スイッチ(ON/OFF):      {output_dc}")
+            print(f"AC出力電圧 (V):             {ac_output_voltage:.1f} V")
+            print(f"出力電力 (W):               {output_power} W")
+            print(f"出力可能時間:                {output_time:.1f} h")
+            print()
+            print(f"ライトモード:                {light_mode}")
+            print(f"ディスプレイ設定:             {screen_timeout_behavior}")
+            print()
+            print(f"緊急充電モード:              {super_fast_charge}")
+            print(f"充電速度設定:                {charge_speed}")
+            print(f"パフォーマンス設定:           {low_power_setting}")
+            print(f"省エネモード:                {power_management}")
+            print(f"自動オフ時間:                {auto_saving_time}")
+            print("--------------------------------\n")
+        except Exception as e:
+            error_msg = f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 通信エラーまたは予期せぬエラーが発生しました: {e}"
+            print(error_msg)
+            with open(error_log_filename, "a", encoding="utf-8") as f_err:
+                f_err.write(error_msg + "\n")
+
         time.sleep(60)
