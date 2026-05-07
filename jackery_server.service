@@ -1,0 +1,18 @@
+[Unit]
+Description=Jackery Web Dashboard Server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+# ★ 自分のユーザー名に変更してください（例: pi, tetsu など）
+User=pi
+# ★ スクリプトの実際のパスに変更してください
+WorkingDirectory=/home/pi/Jackery
+ExecStart=/usr/bin/python3 /home/pi/Jackery/jackery_server.py
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
