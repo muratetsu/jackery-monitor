@@ -286,23 +286,24 @@ if __name__ == "__main__":
     # 登録デバイスが存在する場合、最初のデバイスIDを利用
     device_id = device_list["data"][0]["devId"]
 
-    csv_filename = "jackery_log.csv"
-    error_log_filename = "errorlog.txt"
+    log_dir = Path(__file__).parent  # CSVファイルの保存ディレクトリ
+    error_log_filename = log_dir / "errorlog.txt"
     csv_header = [
         "Timestamp", "Battery(%)", "BatteryTemp(C)", "ACInputPower(W)", "InputPower(W)", "InputTime(h)",
         "OutputAC", "OutputDC", "ACOutputVoltage(V)", "OutputPower(W)", "OutputTime(h)",
         "LightMode", "ScreenTimeout", "SuperFastCharge", "ChargeSpeed", "LowPowerSetting",
         "PowerManagement", "AutoSavingTime"
     ]
-    
-    # CSVファイルが存在しない場合はヘッダーを書き込む
-    if not os.path.exists(csv_filename):
-        with open(csv_filename, "w", encoding="utf-8", newline="") as f:
-            writer = csv.writer(f)
-            writer.writerow(csv_header)
 
     while True:
         try:
+            # 毎ループ開始時に当日のCSVパスを決定（日付をまたいだ際に自動でファイル切り替え）
+            csv_path = log_dir / f"jackery_log_{datetime.now().strftime('%Y-%m-%d')}.csv"
+            if not csv_path.exists():
+                with open(csv_path, "w", encoding="utf-8", newline="") as f:
+                    writer = csv.writer(f)
+                    writer.writerow(csv_header)
+
             result = api.get_device_detail(device_id)
             device_info = result["data"]["properties"]
 
@@ -347,7 +348,7 @@ if __name__ == "__main__":
                 auto_saving_time
             ]
 
-            with open(csv_filename, "a", encoding="utf-8", newline="") as f:
+            with open(csv_path, "a", encoding="utf-8", newline="") as f:
                 writer = csv.writer(f)
                 writer.writerow(row)
 
