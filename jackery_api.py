@@ -295,7 +295,12 @@ if __name__ == "__main__":
         "PowerManagement", "AutoSavingTime"
     ]
 
+    POLL_INTERVAL_NORMAL = 60    # 通常のポーリング間隔（秒）
+    POLL_INTERVAL_IDLE   = 300   # 入出力電力ともゼロ時のポーリング間隔（秒）
+
     while True:
+        input_power  = None
+        output_power = None
         try:
             # 毎ループ開始時に当日のCSVパスを決定（日付をまたいだ際に自動でファイル切り替え）
             csv_path = log_dir / f"jackery_log_{datetime.now().strftime('%Y-%m-%d')}.csv"
@@ -381,4 +386,10 @@ if __name__ == "__main__":
             with open(error_log_filename, "a", encoding="utf-8") as f_err:
                 f_err.write(error_msg + "\n")
 
-        time.sleep(60)
+        # 入力電力と出力電力が共にゼロの場合はサーバー負荷軽減のため待機時間を延長
+        if input_power == 0 and output_power == 0:
+            sleep_seconds = POLL_INTERVAL_IDLE
+            print(f"入力・出力電力ともにゼロのため、次回取得は {sleep_seconds // 60} 分後です。")
+        else:
+            sleep_seconds = POLL_INTERVAL_NORMAL
+        time.sleep(sleep_seconds)
