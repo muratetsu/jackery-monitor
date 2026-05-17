@@ -312,7 +312,7 @@ if __name__ == "__main__":
             output_power = device_info["op"]  # AC+DC出力電力(W)
             ac_input_power = device_info["acip"]  # AC入力電力(W)
             input_power = device_info["ip"] # 入力電力(W)
-            input_time = device_info["it"] / 100.0  # 充電完了時間(h)
+            input_time = device_info["it"] / 10.0  # 充電完了時間(h)
             output_ac = device_info["oac"] == 1  # AC出力のON/OFF
             output_dc = device_info["odc"] == 1  # DC出力のON/OFF
             ac_output_voltage = device_info["acov"] / 10.0  # AC出力電圧(V)
