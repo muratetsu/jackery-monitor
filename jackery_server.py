@@ -37,7 +37,10 @@ def _parse_csv_file(filepath):
     """CSVファイルを読み込んで行リストを返す"""
     try:
         with open(filepath, newline='', encoding='utf-8') as f:
-            return list(csv.DictReader(f))
+            # NUL文字 (\x00) を除去した行のジェネレータを使用することで、
+            # 突然の電源断等でファイルが破損（NUL文字が混入）した場合でもエラーを回避する
+            clean_lines = (line.replace('\x00', '') for line in f)
+            return list(csv.DictReader(clean_lines))
     except Exception as e:
         print(f"[_parse_csv_file] Error: {e}")
         return []
