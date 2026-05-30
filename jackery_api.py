@@ -308,6 +308,8 @@ if __name__ == "__main__":
                 with open(csv_path, "w", encoding="utf-8", newline="") as f:
                     writer = csv.writer(f)
                     writer.writerow(csv_header)
+                    f.flush()
+                    os.fsync(f.fileno())
 
             result = api.get_device_detail(device_id)
             device_info = result["data"]["properties"]
@@ -356,6 +358,8 @@ if __name__ == "__main__":
             with open(csv_path, "a", encoding="utf-8", newline="") as f:
                 writer = csv.writer(f)
                 writer.writerow(row)
+                f.flush()
+                os.fsync(f.fileno())
 
             print("----- ポータブル電源の現在の状態 -----")
             print(f"バッテリー残量 (%):          {remaining_battery}%")
