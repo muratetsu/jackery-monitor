@@ -416,27 +416,58 @@ async function renderChart(){
   const ts = chartData.timestamps.map(t => new Date(t));
   const traces = chartData.columns
     .filter(col => activeSet.has(col))
-    .map(col => ({
-      x: ts, y: chartData.series[col],
-      type: 'scatter', mode: 'lines', name: col,
-      line: { color: getColor(col), width: 2 },
-      hovertemplate: `<b>${col}</b>: %{y}<br>%{x|%Y-%m-%d %H:%M}<extra></extra>`
-    }));
+    .map(col => {
+      const isRightAxis = (col === 'OutputPower(W)');
+      return {
+        x: ts, y: chartData.series[col],
+        type: 'scatter', mode: 'lines',
+        name: col + (isRightAxis ? ' [右軸]' : ''),
+        yaxis: isRightAxis ? 'y2' : 'y',
+        line: { color: getColor(col), width: 2 },
+        hovertemplate: `<b>${col}</b>: %{y}<br>%{x|%Y-%m-%d %H:%M}<extra></extra>`
+      };
+    });
+
+  const hasRightAxis = traces.some(t => t.yaxis === 'y2');
 
   const layout = {
     paper_bgcolor:'transparent', plot_bgcolor:'transparent',
     font: {family:'Inter,sans-serif', color:'#8899bb', size:12},
-    margin: {t:16, r:20, b:60, l:55},
+    margin: {t:40, r: hasRightAxis ? 65 : 20, b:60, l:55},
     xaxis: {
       gridcolor:'rgba(255,255,255,.06)', linecolor:'rgba(255,255,255,.1)',
       tickcolor:'rgba(255,255,255,.1)',
       rangeslider:{bgcolor:'rgba(255,255,255,.03)',bordercolor:'transparent',thickness:0.06},
     },
     yaxis: {
+      title: '残量(%) / 温度(℃) / 入力(W)',
+      titlefont: { size: 11, color: '#8899bb' },
       gridcolor:'rgba(255,255,255,.06)', linecolor:'rgba(255,255,255,.1)',
       tickcolor:'rgba(255,255,255,.1)', zeroline:false,
     },
-    legend: {bgcolor:'rgba(255,255,255,.04)',bordercolor:'rgba(255,255,255,.08)',borderwidth:1,font:{size:11}},
+    yaxis2: {
+      title: '出力電力 (W)',
+      titlefont: { size: 11, color: '#ff6d3b' },
+      tickfont: { color: '#ff6d3b' },
+      overlaying: 'y',
+      side: 'right',
+      showgrid: false,
+      linecolor: 'rgba(255,109,59,.3)',
+      tickcolor: 'rgba(255,109,59,.3)',
+      zeroline: false,
+      visible: hasRightAxis,
+    },
+    legend: {
+      orientation: 'h',
+      x: 0,
+      y: 1.05,
+      xanchor: 'left',
+      yanchor: 'bottom',
+      bgcolor: 'rgba(255,255,255,.04)',
+      bordercolor: 'rgba(255,255,255,.08)',
+      borderwidth: 1,
+      font: { size: 11 }
+    },
     hovermode:'x unified',
     hoverlabel: {bgcolor:'#0d1225',bordercolor:'rgba(0,212,255,.4)',font:{family:'Inter,sans-serif',size:12,color:'#e4eeff'}},
   };
