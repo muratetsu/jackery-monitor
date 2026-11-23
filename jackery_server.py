@@ -250,8 +250,8 @@ footer{text-align:center;padding:22px;color:var(--t3);font-size:12px;}
       <div class="lupd" id="lupd">---</div>
     </div>
     <div class="tab-bar" id="tab-bar">
-      <button class="tab-btn active" id="tab-all"       data-tab="all"       onclick="switchTab('all')">📅 全期間</button>
-      <button class="tab-btn"        id="tab-today"     data-tab="today"     onclick="switchTab('today')">🌅 本日</button>
+      <button class="tab-btn"        id="tab-all"       data-tab="all"       onclick="switchTab('all')">📅 全期間</button>
+      <button class="tab-btn active" id="tab-today"     data-tab="today"     onclick="switchTab('today')">🌅 本日</button>
       <button class="tab-btn"        id="tab-yesterday" data-tab="yesterday" onclick="switchTab('yesterday')">📆 昨日</button>
     </div>
     <div class="tab-hint" id="tab-hint">
@@ -299,7 +299,7 @@ const CARD_DEFS = [
 // ===== URL Hash =====
 function getHash() {
   const p = new URLSearchParams(location.hash.slice(1));
-  return { tab: p.get('tab') || 'all', xr: p.get('xr') || null };
+  return { tab: p.get('tab') || 'today', xr: p.get('xr') || null };
 }
 function setHash(tab, xr) {
   const p = new URLSearchParams();
@@ -485,7 +485,7 @@ def index():
 
 @app.route('/api/data')
 def get_data():
-    date_filter = request.args.get('date', 'all')
+    date_filter = request.args.get('date', 'today')
     data = load_data(date_filter)
     if data is None:
         label = {'today': '本日', 'yesterday': '昨日'}.get(date_filter, date_filter)
